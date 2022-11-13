@@ -16,7 +16,7 @@ pub struct Player {
 
     pos: Vec2,
     speed: Vec2,
-    jump_was_released: bool,
+    btn1_was_released: bool,
 }
 impl Player {
     const SIZE: u32 = 10;
@@ -31,7 +31,7 @@ impl Player {
 
             pos: Vec2::zero(),
             speed: Vec2::zero(),
-            jump_was_released: true,
+            btn1_was_released: true,
         }
     }
 
@@ -69,6 +69,7 @@ impl Player {
         } else {
             self.crosshair_vel.y = 0.0;
         }
+
         // let pressing_jump = Button::Btn1.pressed(1);
         // if self.jump_was_released && pressing_jump {
         //     self.jump_was_released = false;
@@ -152,6 +153,12 @@ impl Player {
                 if Button::Btn2.pressed(1) {
                     self.hook_state = HookState::Ready;
                 }
+                if self.btn1_was_released && Button::Btn1.pressed(1) {
+                    self.hook_state = HookState::Pulling {
+                        pos: self.crosshair_pos + self.pos,
+                        max_dist: self.crosshair_pos.length(),
+                    };
+                }
             }
         }
         self.crosshair_vel.x = self.crosshair_vel.x.max(-CH_MAX_SPEED).min(CH_MAX_SPEED);
@@ -167,6 +174,14 @@ impl Player {
         if self.get_bottom_center().y > 0.0 {
             self.pos.y = -(Self::SIZE as f32 / 2.0);
             self.speed.y = 0.0;
+        }
+
+        if !self.btn1_was_released && !Button::Btn1.pressed(1) {
+            self.btn1_was_released = true;
+        } else {
+            if Button::Btn1.pressed(1) {
+                self.btn1_was_released = false;
+            }
         }
     }
 
@@ -207,6 +222,10 @@ impl Player {
 
     pub fn get_center(&self) -> Vec2 {
         self.pos
+    }
+
+    pub fn get_speed(&self) -> Vec2 {
+        self.speed
     }
 
     pub fn get_bottom_center(&self) -> Vec2 {

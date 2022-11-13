@@ -41,8 +41,10 @@ impl World {
 
         self.player.update();
         // Move the camera towards the player
-        let to_player = self.player.get_center() - self.cam_pos;
-        self.cam_pos += to_player * 0.1;
+        let p_speed = self.player.get_speed().length();
+        let target = self.player.get_center() + self.player.get_speed() * p_speed.powf(0.75);
+        let to_player = target - self.cam_pos;
+        self.cam_pos += to_player * 0.2;
 
         self.draw();
     }
