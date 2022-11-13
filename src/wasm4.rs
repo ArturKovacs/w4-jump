@@ -226,22 +226,38 @@ extern "C" {
 
 // Artur
 // Safe wrappers
-pub const GAMEPAD_1: u8 = 0;
-pub const GAMEPAD_2: u8 = 1;
-pub const GAMEPAD_LEFT: u8 = 4;
-pub const GAMEPAD_RIGHT: u8 = 5;
-pub const GAMEPAD_UP: u8 = 6;
-pub const GAMEPAD_DOWN: u8 = 7;
-pub fn btn_pressed(gamepad: i32, btn: u8) -> bool {
-    unsafe {
-        let gamepad_btns = match gamepad {
-            1 => *GAMEPAD1,
-            2 => *GAMEPAD2,
-            3 => *GAMEPAD3,
-            4 => *GAMEPAD4,
-            x => panic!("No gamepad {} exists", x),
+#[derive(Clone, Copy)]
+pub enum Button {
+    Btn1,
+    Btn2,
+    Left,
+    Right,
+    Up,
+    Down,
+}
+impl Button {
+    pub fn pressed(self, gamepad: i32) -> bool {
+        let gamepad_btns = unsafe {
+            match gamepad {
+                1 => *GAMEPAD1,
+                2 => *GAMEPAD2,
+                3 => *GAMEPAD3,
+                4 => *GAMEPAD4,
+                x => panic!("No gamepad {} exists", x),
+            }
         };
-        ((gamepad_btns >> btn) & 1) != 0
+        let offset = self.get_bit_offset();
+        ((gamepad_btns >> offset) & 1) != 0
+    }
+    pub fn get_bit_offset(self) -> u8 {
+        match self {
+            Button::Btn1 => 0,
+            Button::Btn2 => 1,
+            Button::Left => 4,
+            Button::Right => 5,
+            Button::Up => 6,
+            Button::Down => 7,
+        }
     }
 }
 
